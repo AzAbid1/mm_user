@@ -1,0 +1,23 @@
+{
+  "name": "mm_user",
+  "version": "1.0.0",
+  "description": "marketmind's web service for managing users",
+  "homepage": "https://github.com/AzAbid1/mm_user#readme",
+  "bugs": {
+    "url": "https://github.com/AzAbid1/mm_user/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AzAbid1/mm_user.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
