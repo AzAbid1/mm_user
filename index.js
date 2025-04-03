@@ -3,30 +3,23 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken'); // Import JWT
-
+const User = require('./models/User');
 const app = express();
 const port = process.env.PORT || 3000;
+const passport = require('passport');
+require('./passportConfig'); // Import passport configuration
 
 // Middleware to parse JSON requests
 app.use(express.json());
+app.use(passport.initialize());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ MongoDB connected successfully'))
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// User schema & model
-const userSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    password: { type: String, required: true }
-});
-
-const User = mongoose.model('User', userSchema);
-
 // JWT Secret Key
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const authenticate = (req, res, next) => {
     const token = req.header('Authorization');
@@ -96,6 +89,23 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 });
+
+// Google OAuth Route
+app.get('/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+    passport.authenticate('google', { session: false }),
+    (req, res) => {
+        // Send JWT token after successful login
+        res.json({
+            message: "Google login successful",
+            token: req.user.token,
+            user: req.user.user
+        });
+    }
+);
 
 // Default route
 app.get('/', (req, res) => {
