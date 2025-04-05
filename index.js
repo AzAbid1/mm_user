@@ -4,9 +4,26 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const app = express();
 const port = process.env.PORT || 3000;
+const cors = require("cors");
+require('./config/passportConfig');
 
 // Middleware to parse JSON requests
 app.use(express.json());
+
+// CORS
+const corsOptions = {
+    origin: function (origin, callback) {
+      const allowedOrigins = ['http://localhost:4200', 'http://localhost:3000'];
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
+    credentials: true
+  };
+  app.use(cors(corsOptions));
+
 app.use(passport.initialize());
 
 // Import routes

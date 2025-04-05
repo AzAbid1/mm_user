@@ -21,14 +21,15 @@ const registerUser = async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { userId: newUser._id, email: newUser.email },
-            JWT_SECRET,
-            { expiresIn: '1h' }
+            { id: newUser._id },
+            JWT_SECRET, 
+            { expiresIn: 2592000 }
         );
 
         res.status(201).json({
-            message: "User created successfully",
-            token
+            message: "Account created successfully",
+            token,
+            user: newUser
         });
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
@@ -40,18 +41,18 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Check if user exists
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ message: "Invalid email or password" });
 
-        // Compare passwords
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
 
-        // Generate JWT token
-        const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: user._id },
+            JWT_SECRET, 
+            { expiresIn: 2592000 });
 
-        res.status(200).json({ message: "Login successful", token });
+        res.status(200).json({ message: "Login successful", token, user });
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
@@ -59,15 +60,29 @@ const loginUser = async (req, res) => {
 
 // Google login callback controller
 const googleLoginCallback = (req, res) => {
-    res.json({
-        message: "Google login successful",
-        token: req.user.token,
-        user: req.user.user
-    });
+    const token = req.user.token;
+    const user = req.user.user;
+    const redirectUrl = `${process.env.FRONTEND_URL}/auth/google-success?token=${token}&id=${user._id}`;
+    res.redirect(redirectUrl);
+};
+
+// Get user by ID
+const getUserById = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const user = await User.findById(userId).select('-password'); // Exclude password
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };
 
 module.exports = {
     registerUser,
     loginUser,
-    googleLoginCallback
+    googleLoginCallback,
+    getUserById
 };
