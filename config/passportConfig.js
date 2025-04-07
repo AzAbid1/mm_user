@@ -29,7 +29,11 @@ passport.use(new GoogleStrategy({
         }
 
         // Generate JWT token
-        const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: user._id },
+            JWT_SECRET,
+            { expiresIn: 2592000 }
+        );
 
         return done(null, { user, token });
     } catch (error) {
