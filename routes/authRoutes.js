@@ -4,7 +4,9 @@ const {
     registerUser, 
     loginUser, 
     googleLoginCallback,
-    getUserById
+    getUserById,
+    updateUserDetails,
+    changePassword
  } = require('../controllers/authController');
 
 const router = express.Router();
@@ -22,5 +24,11 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), googleLoginCallback);
 
 router.get('/user/:id', getUserById);
+
+// Update user details
+router.put('/user/:id', updateUserDetails);
+
+// Change password
+router.put('/user/:id/change-password', changePassword);
 
 module.exports = router;
