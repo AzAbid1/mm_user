@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const cors = require("cors");
 require('./config/passportConfig');
+const path = require('path');
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use(passport.initialize());
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -36,6 +38,9 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Use routes
 app.use(authRoutes);
+app.use(productRoutes);
+app.use('/images', express.static(path.join(__dirname, 'public')));
+
 
 // Default route
 app.get('/', (req, res) => {
