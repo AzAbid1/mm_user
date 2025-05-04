@@ -4,9 +4,19 @@ import requests
 import urllib.parse
 from io import BytesIO
 from PIL import Image
-import os
+import base64
+from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],  # Allow your Angular app
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods, including OPTIONS and POST
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Pydantic model to validate frontend input
 class ImageGenRequest(BaseModel):
@@ -14,8 +24,8 @@ class ImageGenRequest(BaseModel):
     product_desc: str
     text_model: str = "openai"
     image_model: str = "Flux"
-    width: str  = "512"
-    height: str  = "512"
+    width: str = "512"
+    height: str = "512"
     seed: str | None = None
 
 @app.post("/generate-image")
@@ -55,13 +65,23 @@ async def generate_image(data: ImageGenRequest):
     image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(enhanced_prompt)}?{query}"
     print("Generating background scene:", image_url)
     try:
+        # Add a delay to ensure loading animation is visible
+        await asyncio.sleep(5)  # Simulate processing time
         img_resp = requests.get(image_url)
         img_resp.raise_for_status()
         background = Image.open(BytesIO(img_resp.content)).convert("RGB")
-        output_path = os.path.join(os.getcwd(), "background_generated.png")
         
-        return {"message": "Image generated successfully", "file_path": output_path}
+        # Convert image to base64
+        buffered = BytesIO()
+        background.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        
+        return {"message": "Image generated successfullydsd", "image": f"data:image/png;base64,{img_str}"}
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error generating image: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing image: {e}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8002)
