@@ -10,8 +10,8 @@ const {
 
 const router = express.Router();
 
-router.post('/products', upload.single('image'), createProduct);
-router.put('/products/:id', upload.single('image'), updateProduct);
+router.post('/products', upload.array('images', 5), createProduct);
+router.put('/products/:id', upload.array('images', 5), updateProduct);
 router.delete('/products/:id', deleteProduct);
 router.get('/products/getOne/:id', getProductById);
 router.get('/products/getAll/:userId', getAllProducts);

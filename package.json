@@ -15,38 +15,32 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "node": "node index.js",
-  "fastapi": "concurrently --kill-others-on-fail \"npm run PostDescriptionModel\" \"npm run image_gen\"",
-
-  "PostDescriptionModel" : "cd model_api/PostDescriptionModel  && python -m uvicorn model_server:app --port 8001 --host 0.0.0.0 ",
-  "image_gen" : "cd model_api/ImageModel  && python -m uvicorn model_server:app --port 8002 --host 0.0.0.0 ",
-
-  "start": "concurrently --kill-others-on-fail \"npm run node\" \"npm run fastapi\"",
-  "dev": "nodemon index.js",
-
-  "postinstall": "npm run install:PostDescriptionModel && npm run install:ImageModel",
-
-  "install:PostDescriptionModel": "cd model_api/PostDescriptionModel && python -m pip install -r requirements.txt",
-  "install:ImageModel" : "cd model_api/ImageModel && python -m pip  install -r requirements.txt"
-},
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "node": "node index.js",
+    "fastapi": "concurrently --kill-others-on-fail \"npm run PostDescriptionModel\" \"npm run image_gen\"",
+    "PostDescriptionModel": "cd model_api/PostDescriptionModel  && python -m uvicorn model_server:app --port 8001 --host 0.0.0.0 ",
+    "image_gen": "cd model_api/ImageModel  && python -m uvicorn model_server:app --port 8002 --host 0.0.0.0 ",
+    "start": "concurrently --kill-others-on-fail \"npm run node\" \"npm run fastapi\"",
+    "dev": "nodemon index.js",
+    "postinstall": "npm run install:PostDescriptionModel && npm run install:ImageModel",
+    "install:PostDescriptionModel": "cd model_api/PostDescriptionModel && python -m pip install -r requirements.txt",
+    "install:ImageModel": "cd model_api/ImageModel && python -m pip  install -r requirements.txt"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "gridfs-stream": "^1.1.1",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.15.0",
     "mongoose": "^8.14.1",
     "multer": "^1.4.5-lts.1",
-    "multer-gridfs-storage": "^5.0.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9",
-    "concurrently": "^9.0.1"
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.9"
   }
 }

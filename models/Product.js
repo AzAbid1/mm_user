@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  imageFileName: { type: String }, // local filename stored in "public"
+  imageFileNames: [{ type: String }], // Changed to array for multiple images
   price: { type: Number, required: true },
   category: { type: String, required: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
