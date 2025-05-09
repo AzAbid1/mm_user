@@ -48,8 +48,7 @@ async def generate_image(data: ImageGenRequest):
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error enhancing prompt: {e}")
 
-    print("Enhanced prompt:")
-    print(enhanced_prompt)
+    
 
     params = {
         'model': data.image_model,
@@ -66,7 +65,7 @@ async def generate_image(data: ImageGenRequest):
     print("Generating background scene:", image_url)
     try:
         # Add a delay to ensure loading animation is visible
-        await asyncio.sleep(5)  # Simulate processing time
+        await asyncio.sleep(1)  # Simulate processing time
         img_resp = requests.get(image_url)
         img_resp.raise_for_status()
         background = Image.open(BytesIO(img_resp.content)).convert("RGB")
