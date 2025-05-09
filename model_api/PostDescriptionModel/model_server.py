@@ -58,3 +58,6 @@ async def generate_posts(data: InputData):
         return {"output": content}
     else:
         return {"error": response.text}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
