@@ -4,7 +4,7 @@ const path = require('path');
 
 const createProduct = async (req, res) => {
   try {
-    const { name, price, category, user } = req.body;
+    const { name, price, category, user, description } = req.body;  // Add description
 
     // Validate required fields
     if (!req.files || req.files.length === 0) {
@@ -23,7 +23,8 @@ const createProduct = async (req, res) => {
       imageFileNames,
       price,
       category,
-      user
+      user,
+      description  // Add description
     });
 
     await newProduct.save();
@@ -37,15 +38,15 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
-    const { name, price, category, deleteImages } = req.body;
-
-    const updateFields = { name, price, category };
-
+    const { name, price, category, deleteImages, description } = req.body;  // Add description
+    const updateFields = { name, price, category, description };  // Add description
+     
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-
+    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    console.log(description);
     // Parse deleteImages (may be JSON string or array)
     let imagesToDelete = [];
     try {
