@@ -2,9 +2,16 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 import requests
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],  # Allow your Angular app
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods, including OPTIONS and POST
+    allow_headers=["*"],  # Allow all headers
+)
 # If using a .env file:
 from dotenv import load_dotenv
 load_dotenv()
@@ -51,3 +58,6 @@ async def generate_posts(data: InputData):
         return {"output": content}
     else:
         return {"error": response.text}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
