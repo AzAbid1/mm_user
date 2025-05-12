@@ -17,18 +17,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "node": "node index.js",
-    "fastapi": "concurrently --kill-others-on-fail \"npm run PostDescriptionModel\" \"npm run image_gen\"   \"npm run PostingTimeModel\"   \"npm run RecommendationModel\"",
-    "PostDescriptionModel": "cd model_api/PostDescriptionModel  && python -m uvicorn model_server:app --port 8001 --host 0.0.0.0 ",
-    "image_gen": "cd model_api/ImageModel  && python -m uvicorn model_server:app --port 8002 --host 0.0.0.0 ",
-    "PostingTimeModel": "cd model_api/PostingTimeModel && python -m uvicorn model_server:app --port 8004 --host 0.0.0.0",
-    "RecommendationModel": "cd model_api/RecommendationModel && python -m uvicorn api:app --port 8005 --host 0.0.0.0",
-    "start": " npm run reqinstall && concurrently --kill-others-on-fail  \"npm run node\" \"npm run fastapi\"",
+    "PostDescriptionModel": "cd model_api/PostDescriptionModel && py -m uvicorn model_server:app --port 8001 --host 0.0.0.0",
+    "image_gen": "cd model_api/ImageModel && py -m uvicorn model_server:app --port 8002 --host 0.0.0.0",
+    "PostingTimeModel": "cd model_api/PostingTimeModel && py -m uvicorn model_server:app --port 8004 --host 0.0.0.0",
+    "RecommendationModel": "cd model_api/RecommendationModel && py -m uvicorn recommendation_api:app --port 8005 --host 0.0.0.0",
+    "fastapi": "echo Starting FastAPI services... && concurrently --kill-others-on-fail -n POSTDESC,IMGGEN,TIME,RECO -c \"cyan.bold,magenta.bold,yellow.bold,green.bold\" \"npm run PostDescriptionModel\" \"npm run image_gen\" \"npm run PostingTimeModel\" \"npm run RecommendationModel\"",
+    "start": "npm run reqinstall && concurrently --kill-others-on-fail -n API,BACKEND -c \"blue.bold,red.bold\" \"npm run fastapi\" \"npm run node\"",
     "dev": "nodemon index.js",
     "reqinstall": "npm run install:PostDescriptionModel && npm run install:ImageModel && npm run install:PostingTimeModel && npm run install:RecommendationModel",
-    "install:PostDescriptionModel": "cd model_api/PostDescriptionModel && python -m pip install -r requirements.txt",
-    "install:ImageModel": "cd model_api/ImageModel && python -m pip install -r requirements.txt",
-    "install:PostingTimeModel": "cd model_api/PostingTimeModel && python -m pip install -r requirements.txt",
-    "install:RecommendationModel": "cd model_api/RecommendationModel && python -m pip install -r requirements.txt"
+    "install:PostDescriptionModel": "cd model_api/PostDescriptionModel && py -m pip install -r requirements.txt",
+    "install:ImageModel": "cd model_api/ImageModel && py -m pip install -r requirements.txt",
+    "install:PostingTimeModel": "cd model_api/PostingTimeModel && py -m pip install -r requirements.txt",
+    "install:RecommendationModel": "cd model_api/RecommendationModel && py -m pip install -r requirements.txt"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
