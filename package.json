@@ -17,16 +17,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "node": "node index.js",
-    "fastapi": "concurrently --kill-others-on-fail \"npm run PostDescriptionModel\" \"npm run image_gen\"",
+    "fastapi": "concurrently --kill-others-on-fail \"npm run PostDescriptionModel\" \"npm run image_gen\"   \"npm run PostingTimeModel\"  ",
     "PostDescriptionModel": "cd model_api/PostDescriptionModel  && python -m uvicorn model_server:app --port 8001 --host 0.0.0.0 ",
     "image_gen": "cd model_api/ImageModel  && python -m uvicorn model_server:app --port 8002 --host 0.0.0.0 ",
-    "PostingTimeModel": "cd model_api/PostingTimeModel && python -c \"import os; os.makedirs('venv', exist_ok=True) if not os.path.exists('venv') else None\" && python -m venv venv && venv\\Scripts\\uvicorn.exe model_server:app --port 8003 --host 0.0.0.0",
-    "start": "concurrently --kill-others-on-fail \"npm run node\" \"npm run fastapi\"",
+    "PostingTimeModel": "cd model_api/PostingTimeModel && python -m uvicorn model_server:app --port 8004 --host 0.0.0.0",
+    "start": " npm run reqinstall && concurrently --kill-others-on-fail  \"npm run node\" \"npm run fastapi\"",
     "dev": "nodemon index.js",
-    "postinstall": "npm run install:PostDescriptionModel && npm run install:ImageModel && npm run install:PostingTimeModel",
+    "reqinstall": "npm run install:PostDescriptionModel && npm run install:ImageModel && npm run install:PostingTimeModel",
     "install:PostDescriptionModel": "cd model_api/PostDescriptionModel && python -m pip install -r requirements.txt",
-    "install:ImageModel": "cd model_api/ImageModel && python -m pip  install -r requirements.txt",
-    "install:PostingTimeModel": "cd model_api/PostingTimeModel && python -c \"import os; os.makedirs('venv', exist_ok=True) if not os.path.exists('venv') else None\" && python -m venv venv && venv\\Scripts\\python.exe -m pip install -r requirements.txt"
+    "install:ImageModel": "cd model_api/ImageModel && python -m pip install -r requirements.txt",
+    "install:PostingTimeModel": "cd model_api/PostingTimeModel && python -m pip install -r requirements.txt"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

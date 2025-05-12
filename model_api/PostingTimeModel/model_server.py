@@ -5,9 +5,16 @@ from datetime import datetime, timedelta
 import joblib
 import os
 from enum import Enum
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Social Media Posting Time Predictor")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],  # Allow your Angular app
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods, including OPTIONS and POST
+    allow_headers=["*"],  # Allow all headers
+)
 # Define platform enum for input validation
 class Platform(str, Enum):
     facebook = "facebook"
