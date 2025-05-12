@@ -5,6 +5,13 @@ import chromadb
 import pandas as pd
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
+import numpy as np
+import sys
+import json
+
+# Set stdout encoding to UTF-8 to handle Unicode characters
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
 
 app = FastAPI(title="Social Media Recommendation Model")
 
@@ -31,13 +38,35 @@ class RecommendationInput(BaseModel):
     date: Optional[str] = None
     lang: str = "français"
 
+def convert_numpy_types(obj):
+    """Recursively convert NumPy types to Python types."""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple(convert_numpy_types(item) for item in obj)
+    return obj
+
 @app.post("/recommend")
 async def get_recommendations(input: RecommendationInput):
     try:
+        # Validate product and category
+        if not input.product or input.product.strip() == "":
+            raise HTTPException(status_code=400, detail="Product name cannot be empty")
+        if not input.category or input.category.strip() == "":
+            raise HTTPException(status_code=400, detail="Category cannot be empty")
+
         date = pd.Timestamp(input.date) if input.date else pd.Timestamp.now()
         result = recommend_post_format(
-            product=input.product,
-            category=input.category,
+            product=input.product.strip(),
+            category=input.category.strip(),
             tone=input.tone,
             platform=input.platform,
             emotion=input.emotion,
@@ -46,9 +75,20 @@ async def get_recommendations(input: RecommendationInput):
             lang=input.lang
         )
         if "error" in result:
+            # Log error as JSON to avoid encoding issues
+            error_log = json.dumps({"error": result["error"]}, ensure_ascii=False)
+            print(f"Error from recommend_post_format: {error_log}")
             raise HTTPException(status_code=400, detail=result["error"])
-        return {"recommendations": result}
+        
+        # Convert NumPy types to Python types
+        serialized_result = convert_numpy_types(result)
+        # Log result as JSON to handle Unicode characters
+        result_log = json.dumps(serialized_result, ensure_ascii=False)
+        print(f"Serialized result: {result_log}")
+        return {"recommendations": serialized_result}
     except Exception as e:
+        # Log exception as string to avoid encoding issues
+        print(f"Exception: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 @app.get("/search_recommendations")
@@ -60,7 +100,7 @@ async def search_recommendations(query: str, top_k: int = 5):
             n_results=top_k,
             include=["metadatas", "documents"]
         )
-        return {
+        serialized_results = convert_numpy_types({
             "recommendations": [
                 {
                     "id": results["ids"][0][i],
@@ -69,8 +109,13 @@ async def search_recommendations(query: str, top_k: int = 5):
                 }
                 for i in range(len(results["ids"][0]))
             ]
-        }
+        })
+        # Log result as JSON
+        result_log = json.dumps(serialized_results, ensure_ascii=False)
+        print(f"Search result: {result_log}")
+        return serialized_results
     except Exception as e:
+        print(f"Exception: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 if __name__ == "__main__":
