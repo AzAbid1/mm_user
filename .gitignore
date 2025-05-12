@@ -1,5 +1,12 @@
 # Node
-
 node_modules/
 .env
 model_api/PostingTimeModel/venv/
+
+# Python
+__pycache__/
+*.pyc
+model_cache/
+model_api/ImageModel/venv/
+model_api/PostDescriptionModel/venv/
+model_api/Recommendationmodel/venv/
