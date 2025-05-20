@@ -3,31 +3,43 @@ from pydantic import BaseModel
 import requests
 import os
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+from mistralai import Mistral
+from fastapi.responses import FileResponse
+from gtts import gTTS
+import uuid
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+# CORS middleware for Angular frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],  # Allow your Angular app
+    allow_origins=["http://localhost:4200"],  # Allow Angular app
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods, including OPTIONS and POST
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-# If using a .env file:
+
+# Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
 
-API_KEY = os.getenv("MISTRAL_API_KEY", "your-hardcoded-key")  # Secure in production
-
-MODEL_ID = "ft:open-mistral-7b:b078f810:20250410:c7eee20e"
+API_KEY = os.getenv("MISTRAL_API_KEY", "j57g1pobCtAZIPkC9jzy9OEcvf0crHb2")  # Secure in production
+MODEL_ID = "mistral-large-latest"
 ENDPOINT = "https://api.mistral.ai/v1/chat/completions"
-
-# Pydantic model to parse request body
+client = Mistral(api_key=API_KEY)
+# Pydantic model for request body
 class InputData(BaseModel):
     user_description: str
 
 @app.post("/PostDescreption")
-async def generate_posts(data: InputData):
+async def generate_posts(data: InputData, request: Request):
+    logger.debug(f"Received request: {await request.json()}")
+
     prompt = f"""
     Given the following user-provided product description: '{data.user_description}', generate promotional content optimized for my fine-tuned model. Produce the following two outputs:
 
@@ -40,25 +52,29 @@ async def generate_posts(data: InputData):
     **Instagram Post Description:** [generated text]
     """
 
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
+    try:
+        chat_response = client.chat.complete(
+            model=MODEL_ID,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        content = chat_response.choices[0].message.content
+        logger.debug(f"Mistral API response: {content}")
 
-    payload = {
-        "model": MODEL_ID,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7,
-        "max_tokens": 500
-    }
+        # Generate audio from content
+        tts = gTTS(text=content, lang='en')
+        filename = f"post_audio_{uuid.uuid4()}.mp3"
+        filepath = f"./{filename}"
+        tts.save(filepath)
 
-    response = requests.post(ENDPOINT, headers=headers, json=payload)
+        return {
+            "content": content,
+            "audio_file": f"http://localhost:8001/audio/{filename}"
+        }
 
-    if response.status_code == 200:
-        content = response.json()["choices"][0]["message"]["content"]
-        return {"output": content}
-    else:
-        return {"error": response.text}
+    except Exception as e:
+        logger.error(f"Error calling Mistral API: {str(e)}")
+        return {"error": f"Failed to process request: {str(e)}", "status_code": 500}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
